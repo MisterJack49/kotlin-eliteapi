@@ -123,7 +123,7 @@ class GameStatus(
     lateinit var gameMode: String
 
     @JsonIgnore
-    var InNoFireZone: Boolean? = null
+    var inNoFireZone: Boolean? = null
 
     @JsonIgnore
     var jumpRange: Double? = null

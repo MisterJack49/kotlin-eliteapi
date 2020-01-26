@@ -1,9 +1,9 @@
+import events.EventHandler
 import kotlinx.event.event
 import status.GameStatus
 import java.io.File
 import java.io.IOException
 import java.util.logging.Logger
-import javax.print.attribute.standard.Severity
 
 
 class EliteDangerousAPI {
@@ -11,7 +11,7 @@ class EliteDangerousAPI {
         private set
 
     val standardDirectory =
-        File(System.getProperty("user.home") + "\\Saved Games\\Frontier Developments\\Elite Dangerous")
+            File(System.getProperty("user.home") + "\\Saved Games\\Frontier Developments\\Elite Dangerous")
 
     var isRunning: Boolean = false
 
@@ -21,8 +21,15 @@ class EliteDangerousAPI {
     var logger: Logger
 
     var status: GameStatus = GameStatus()
+    var journalParser = JournalParser(this)
+
+    val events = EventHandler()
 
     val onError = event<Pair<String, Exception>>()
+    val onReady = event<Unit>()
+    val onQuit = event<Unit>()
+    val onLoad = event < Pair<String, Float>>()
+
 
     constructor() {
         journalDirectory = standardDirectory
@@ -75,7 +82,7 @@ class EliteDangerousAPI {
             logger.warning("Couldn't instantiate service 'Status'.")
         }
         try {
-            JournalParser = JournalParser(this)
+            journalParser = JournalParser(this)
         } catch (ex: Exception) {
             logger.warning("Couldn't instantiate service 'JournalParser'.")
         }
@@ -84,7 +91,7 @@ class EliteDangerousAPI {
 //        } catch (ex: Exception) {
 //            Logger.Log(Severity.Warning, "Couldn't instantiate service 'MaterialWatcher'.", ex)
 //        }
-        JournalParser.processedLogs = MutableList<String>
+        journalParser.processedLogs.clear()
     }
 
     fun start() {
@@ -100,10 +107,10 @@ class EliteDangerousAPI {
 
             if (!standardDirectory.exists()) {
                 onError.invoke(
-                    Pair(
-                        "The default journal directory does not exist on this machine. This error usually occurs when Elite: Dangerous hasn't been run on this machine yet.",
-                        IOException("'${standardDirectory.absolutePath}' could not be found.")
-                    )
+                        Pair(
+                                "The default journal directory does not exist on this machine. This error usually occurs when Elite: Dangerous hasn't been run on this machine yet.",
+                                IOException("'${standardDirectory.absolutePath}' could not be found.")
+                        )
                 )
                 return;
             }
@@ -120,16 +127,16 @@ class EliteDangerousAPI {
         try {
             logger.info("Searching for 'Journal.*.log' files.")
             journalFile = journalDirectory.listFiles()!!.asSequence()
-                .filter { it.name.startsWith("Journal.") }
-                .sortedByDescending { it.lastModified() }
-                .first()
+                    .filter { it.name.startsWith("Journal.") }
+                    .sortedByDescending { it.lastModified() }
+                    .first()
             logger.info("Found '${journalFile}'.")
         } catch (ex: Exception) {
-            isRunning = false;
+            isRunning = false
             onError.invoke(
-                Pair("Could not find Journal files in '$journalDirectory'.", ex)
+                    Pair("Could not find Journal files in '$journalDirectory'.", ex)
             )
-            return;
+            return
         }
 
         //Check for the support JSON files.
@@ -138,10 +145,10 @@ class EliteDangerousAPI {
         try {
             //Status.json.
             foundStatus =
-                if (File(journalDirectory.absolutePath + "\\Status.json").exists()) {
-                    logger.info("Found 'Status.json'."); true; } else {
-                    logger.warning("Could not find 'Status.json' file."); false
-                }
+                    if (File(journalDirectory.absolutePath + "\\Status.json").exists()) {
+                        logger.info("Found 'Status.json'."); true; } else {
+                        logger.warning("Could not find 'Status.json' file."); false
+                    }
 
             //Cargo.json.
             if (File(journalDirectory.absolutePath + "\\Cargo.json").exists()) {
@@ -151,23 +158,23 @@ class EliteDangerousAPI {
 
             //Shipyard.json.
             logger.info(
-                if (File(journalDirectory.absolutePath + "\\Shipyard.json").exists())
-                    "Found 'Shipyard.json'."
-                else "Could not find 'Shipyard.json' file."
+                    if (File(journalDirectory.absolutePath + "\\Shipyard.json").exists())
+                        "Found 'Shipyard.json'."
+                    else "Could not find 'Shipyard.json' file."
             )
 
             //Outfitting.json.
             logger.info(
-                if (File(journalDirectory.absolutePath + "\\Outfitting.json").exists())
-                    "Found 'Outfitting.json'."
-                else "Could not find 'Outfitting.json' file."
+                    if (File(journalDirectory.absolutePath + "\\Outfitting.json").exists())
+                        "Found 'Outfitting.json'."
+                    else "Could not find 'Outfitting.json' file."
             )
 
             //Market.json.
             logger.info(
-                if (File(journalDirectory.absolutePath + "\\Market.json").exists())
-                    "Found 'Market.json'."
-                else "Could not find 'Market.json' file."
+                    if (File(journalDirectory.absolutePath + "\\Market.json").exists())
+                        "Found 'Market.json'."
+                    else "Could not find 'Market.json' file."
             );
 
             //ModulesInfo.json.
@@ -196,9 +203,11 @@ class EliteDangerousAPI {
         }
 
         //Process the journal file.
-        if (!skipCatchUp) { logger.info("Catching up with past events from this session."); }
-        JournalParser.ProcessJournal(journalFile, skipCatchUp, false, true);
-        if (!skipCatchUp) { logger.info("Catchup on past events completed."); }
+        if (!skipCatchUp) {
+            logger.info("Catching up with past events from this session."); }
+        journalParser.processJournal(journalFile, skipCatchUp, false, true);
+        if (!skipCatchUp) {
+            logger.info("Catchup on past events completed."); }
 
 //        //Go async.
 //        Task.Run(() =>
