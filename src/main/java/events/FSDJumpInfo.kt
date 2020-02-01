@@ -49,7 +49,7 @@ class FSDJumpInfo : Event<FSDJumpInfo> {
     @JsonProperty("FuelLevel")
     var fuelLevel: Double = 0.0
     @JsonProperty("Factions")
-    var factions: List<FSDFaction> = listOf()
+    var jumpFactions: List<FSDJumpFaction> = listOf()
     @JsonProperty("SystemFaction")
     var systemFaction: SystemFaction = SystemFaction()
     @JsonProperty("FactionState")
@@ -61,7 +61,7 @@ class FSDJumpInfo : Event<FSDJumpInfo> {
             )
 }
 
-class FSDFaction {
+class FSDJumpFaction {
     @JsonProperty("Name")
     var name: String = ""
     @JsonProperty("FactionState")
