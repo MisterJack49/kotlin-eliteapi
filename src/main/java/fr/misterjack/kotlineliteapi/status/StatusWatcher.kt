@@ -1,8 +1,8 @@
 package fr.misterjack.kotlineliteapi.status
 
-import fr.misterjack.kotlineliteapi.EliteDangerousAPI
 import dev.vishna.watchservice.KWatchChannel
 import dev.vishna.watchservice.asWatchChannel
+import fr.misterjack.kotlineliteapi.EliteDangerousAPI
 import fr.misterjack.kotlineliteapi.events.EventHandler
 import fr.misterjack.kotlineliteapi.events.FSDJumpInfo
 import fr.misterjack.kotlineliteapi.events.LoadGameInfo
@@ -12,6 +12,7 @@ import fr.misterjack.kotlineliteapi.events.StartJumpInfo
 import fr.misterjack.kotlineliteapi.events.StatusEvent
 import fr.misterjack.kotlineliteapi.events.SupercruiseEntryInfo
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import org.javers.core.JaversBuilder
@@ -19,6 +20,7 @@ import org.javers.core.diff.changetype.ValueChange
 import java.io.File
 
 
+@ObsoleteCoroutinesApi
 class StatusWatcher(private val api: EliteDangerousAPI) {
     private var inNoFireZone: Boolean = false
     private var jumpRange = -1.0

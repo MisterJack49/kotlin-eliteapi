@@ -46,7 +46,7 @@ class JournalParser(private val api: EliteDangerousAPI) {
 
             val eventClass = Class.forName("events.${eventName}Info")
             val eventMethod = eventClass.getMethod("process", String::class.java, EliteDangerousAPI::class.java)
-            val parsedEvent = eventMethod.invoke(eventClass.constructors.first().newInstance(), json, api)
+            eventMethod.invoke(eventClass.constructors.first().newInstance(), json, api)
 
         } catch (e: Exception) {
             api.logger.warning("Issue while processing event '$eventName': ${e.message}")
